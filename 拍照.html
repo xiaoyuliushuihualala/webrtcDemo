@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+	</head>
+	<body>
+		<video autoplay playsinline id="player"></video>
+
+		<button id="takePhoto">拍照</button>
+
+		<canvas id="picture"></canvas>
+
+		<button id="save">保存</button>
+
+		<select id="filter">
+			<option value="none">None</option>
+			<option value="blur">blur</option>
+			<option value="grayscale">Grayscale</option>
+			<option value="invert">Invert</option>
+			<option value="sepia">sepia</option>
+		</select>
+	</body>
+	<script>
+		var videoplay = document.getElementById('player')
+
+		function gotMediaStream(stream) {
+			videoplay.srcObject = stream
+		}
+
+		function handleError(err) {
+			console.log('getUserMedia error:', err)
+		}
+
+		var constraints = {
+			video: { width: 1280, height: 720, frameRate: 15 },
+			audio: false
+		}
+
+		navigator.mediaDevices
+			.getUserMedia(constraints)
+			.then(gotMediaStream)
+			.catch(handleError)
+
+		var filter = document.querySelector('#filter')
+		var selected = ''
+
+		filter.onchange = function () {
+			selected = filter.value
+		}
+
+		var picture = document.getElementById('picture')
+
+		var takePhoto = document.getElementById('takePhoto')
+		takePhoto.onclick = function () {
+			picture.width = 640
+			picture.height = 480
+
+			var ctx = picture.getContext('2d')
+
+			if (selected === 'sepia') {
+				ctx.filter = 'sepia(1)'
+			} else if (selected === 'grayscale') {
+				ctx.filter = 'grayscale(1)'
+			} else if (selected === 'blur') {
+				ctx.filter = 'blur(3px)'
+			} else if (selected === 'invert') {
+				ctx.filter = 'invert(1)'
+			} else {
+				ctx.filter = 'none'
+			}
+
+			ctx.drawImage(videoplay, 0, 0, picture.width, picture.height)
+		}
+
+		function downLoad(url) {
+			debugger
+			var a = document.createElement('a')
+			a.download = 'photo'
+			a.href = url
+			document.body.appendChild(a)
+			a.click()
+			a.remove()
+		}
+
+		document.querySelector('button#save').onclick = function () {
+			downLoad(picture.toDataURL('image/jpeg'))
+		}
+	</script>
+</html>
+<style>
+	.none {
+		-webkit-filter: none;
+	}
+	.blur {
+		-webkit-filter: blur(3px);
+	}
+	.grayscale {
+		-webkit-filter: grayscale(1);
+	}
+	.invert {
+		-webkit-filter: invert(1);
+	}
+	.sepia {
+		-webkit-filter: sepia(1);
+	}
+</style>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+	</head>
+	<body>
+		<div>
+			<div class="header">
+				<button id="startShare">开始共享</button>
+				<button id="startRecord">开始录制</button>
+			</div>
+			<div class="play">
+				<video id="playDevice" autoplay playsinline></video>
+			</div>
+		</div>
+	</body>
+	<script>
+		var contains = {
+			width: { min: 640, ideal: 1280 },
+			height: { min: 360, ideal: 720 },
+			aspectRatio: 16 / 9,
+			frameRate: 15,
+			video: true
+		}
+
+		function shareDesktop() {
+			navigator.mediaDevices
+				.getDisplayMedia(contains)
+				.then(getDesStream)
+				.catch(console.log('eee'))
+		}
+		var localStream
+		function getDesStream(stream) {
+			var playDevice = document.getElementById('playDevice')
+			localStream = stream
+			playDevice.srcObject = stream
+		}
+
+		var startShare = document.getElementById('startShare')
+		var startRecord = document.getElementById('startRecord')
+		startShare.onclick = () => {
+			shareDesktop()
+		}
+		startRecord.onclick = () => {
+			startRecordVideo()
+		}
+
+		var buffer = []
+		function handleAvailable(e) {
+			if (e && e.data && e.data.size > 0) {
+				buffer.push(e.data)
+			}
+		}
+
+		function startRecordVideo() {
+			var options = { mimeType: 'video/webm;codecs=vp8' }
+			if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+				console.log('error')
+				return
+			}
+
+			try {
+				var mediaRecorder = new MediaRecorder(localStream, options)
+			} catch (e) {
+				console.log(e)
+			}
+			mediaRecorder.ondataavailable = handleAvailable
+			mediaRecorder.start(10)
+		}
+	</script>
+</html>

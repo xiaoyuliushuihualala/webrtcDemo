@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+	</head>
+	<body>
+		<div>
+			<button id="record">开始录制</button>
+			<button id="replay">播放</button>
+			<button id="save">保存</button>
+		</div>
+		<div>
+			<video id="replayVideo"></video>
+			<video id="localVideo" autoplay></video>
+			
+		</div>
+	</body>
+	<script>
+		const mediaStreamContrains = {
+			video: {
+				frameRate: { min: 20 },
+				width: { min: 640, ideal: 1280 },
+				height: { min: 360, ideal: 720 },
+				aspectRatio: 16 / 9,
+				facingMode: 'user'
+			},
+			audio: {
+				echoCancellation: false,
+				noiseSuppression: true,
+				autoGainControl: true
+			}
+		}
+
+		var localVideo = document.querySelector('#localVideo')
+		var replayVideo = document.querySelector('#replayVideo')
+
+		var localStream
+		navigator.mediaDevices
+			.getUserMedia(mediaStreamContrains)
+			.then((stream) => {
+				localVideo.srcObject = stream
+				localStream = stream
+			})
+
+		var record = document.querySelector('#record')
+		var replay = document.querySelector('#replay')
+		var btnDownload = document.querySelector('#save')
+
+		record.onclick = () => {
+			startRecord()
+		}
+
+		replay.onclick = () => {
+			startReplay()
+		}
+
+		save.onclick = () => {
+			startSave()
+		}
+
+		var buffer
+		function handleDataAvailable(e) {
+			if (e && e.data && e.data.size > 0) {
+				buffer.push(e.data)
+			}
+		}
+		var mediaRecorder
+		function startRecord() {
+			buffer = []
+
+			//设置录制下的多媒体格式
+			var options = {
+				mimeType: 'video/webm;codecs=vp8'
+			}
+
+			//浏览器是否支持mimeType格式的录制
+			if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+				return
+			}
+
+			try {
+				//创建录制对象
+
+				mediaRecorder = new MediaRecorder(localStream, options)
+			} catch (e) {
+				console.log(e)
+			}
+			mediaRecorder.ondataavailable = handleDataAvailable
+			mediaRecorder.start(10)
+		}
+
+		function startReplay() {
+			var blob = new Blob(buffer, { type: 'video/webm' })
+			replayVideo.src = window.URL.createObjectURL(blob)
+			replayVideo.srcObject = null
+			replayVideo.controls = true
+			replayVideo.play()
+		}
+
+		btnDownload.onclick = () => {
+			var blob = new Blob(buffer, { type: 'video/webm' })
+			var url = window.URL.createObjectURL(blob)
+			var a = document.createElement('a')
+			a.href = url
+			a.style.display = 'none'
+			a.download = 'aaa.webm'
+			a.click()
+		}
+	</script>
+</html>
+<style>
+	#replayVideo,
+	#localVideo {
+		width: 300px;
+	}
+</style>

@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "express": "^4.17.3",
+    "log4js": "^6.4.1",
+    "node-static": "^0.7.11",
+    "serve-index": "^1.9.1",
+    "socket.io": "^4.4.1"
+  }
+}

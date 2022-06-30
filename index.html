@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+	</head>
+	<body>
+		<h1>Realtime communication with WebRTC</h1>
+		<video autoplay playsinline></video>
+	</body>
+	<script>
+		const mediaStreamContrains = {
+			video: true
+		}
+		const localVideo = document.querySelector('video')
+
+		function gotLocalMediaStream(mediaStream) {
+			localVideo.srcObject = mediaStream
+		}
+
+		function handleLocalMediaStreamError(error) {
+			console.log(error)
+		}
+
+		navigator.mediaDevices
+			.getUserMedia(mediaStreamContrains)
+			.then(gotLocalMediaStream)
+			.catch(handleLocalMediaStreamError)
+	</script>
+</html>
